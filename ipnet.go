@@ -98,7 +98,7 @@ func getMaxMask(version int) []byte {
 
 // IPv4 Network
 var (
-	IPv46To4      = MustNewIPNetwork("192.88.99.0/24") //6to4 anycast relays (RFC 3068)
+	IPv46To4      = MustNewIPNetwork("192.88.99.0/24") // 6to4 anycast relays (RFC 3068)
 	IPv4Loopback  = MustNewIPNetwork("127.0.0.0/8")    // Loopback addresses (RFC 990)
 	IPv4LinkLocal = MustNewIPNetwork("169.254.0.0/16")
 	IPv4Multicast = MustNewIPNetwork("224.0.0.0/4")
