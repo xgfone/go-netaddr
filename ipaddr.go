@@ -212,6 +212,23 @@ func (ip IPAddress) BigInt() *big.Int {
 	return nil
 }
 
+// Network returns the network of the ip address.
+func (ip IPAddress) Network() (net IPNetwork) {
+	var err error
+	switch ip.version {
+	case 4:
+		net, err = NewIPNetworkFromIPAddress(ip, ipv4MaxBit)
+	case 6:
+		net, err = NewIPNetworkFromIPAddress(ip, ipv6MaxBit)
+	default:
+		return IPNetwork{}
+	}
+	if err != nil {
+		panic(err)
+	}
+	return net
+}
+
 // Equal reports whether ip is equal to other.
 func (ip IPAddress) Equal(other IPAddress) bool {
 	return ip.ip.Equal(other.ip)

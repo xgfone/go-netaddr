@@ -106,3 +106,17 @@ func ExampleIPAddress_Less() {
 	// Output:
 	// true
 }
+
+func ExampleIPAddress_Network() {
+	ip := MustNewIPAddress("192.168.10.10")
+	net := ip.Network()
+	fmt.Println(net)
+
+	ip = MustNewIPAddress("fe80::d656:43a8:fc42:948c")
+	net = ip.Network()
+	fmt.Println(net)
+
+	// Output:
+	// 192.168.10.10/32
+	// fe80::d656:43a8:fc42:948c/128
+}
