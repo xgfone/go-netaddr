@@ -2,7 +2,7 @@ package netaddr
 
 import (
 	"fmt"
-	"math"
+	"math/big"
 	"net"
 	"strings"
 )
@@ -13,27 +13,19 @@ type IPAddress struct {
 	version int
 }
 
-// NewIPAddressByUint64 returns a new IPAddress by uint64.
-//
-// If the second argument exists, it represents that the ip addres is a IPv6,
-// or IPv4.
-func NewIPAddressByUint64(v1 uint64, v2 ...uint64) IPAddress {
-	// IPv4
-	if len(v2) == 0 {
-		bs := uint32ToBytes(uint32(v1))
-		return IPAddress{ip: net.IPv4(bs[0], bs[1], bs[2], bs[3]).To4(), version: 4}
-	}
-
-	// IPv6
-	bs := uint64ToBytes(v1, v2[0])
-	return IPAddress{ip: net.IP(bs[:]), version: 6}
-}
-
 // NewIPAddress returns a new IPAddress.
 //
-// The argument, ip, maybe a string, []byte, [4]byte, [6]byte, float64 or net.IP
-// representation of IPv4 or IPv6. Except for float64 and net.IP, version is
-// optional for other types.
+// The argument, ip, is a IPv4 or IPv6 address, which maybe a string, []byte,
+// [4]byte, [6]byte, net.IP or *big.Int.
+//
+// For net.IP and *big.Int, the version is necessary, which reprensents
+// the verion of the IP address, that's, 4 or 6.
+//
+// For []byte, the version is necessary if the length of bytes is not 4 or 16.
+//
+// For string, it maybe either a ipv4/ipv6 address or a integer string.
+// If it's a integer string, it represents the integer value of the ipv4/ipv6,
+// and must appoint the version explicitly.
 func NewIPAddress(ip interface{}, version ...int) (IPAddress, error) {
 	var _ip net.IP
 	var _version int
@@ -49,8 +41,16 @@ func NewIPAddress(ip interface{}, version ...int) (IPAddress, error) {
 	case string:
 		v := ip.(string)
 		if _ip = net.ParseIP(v); _ip == nil {
-			return IPAddress{}, fmt.Errorf("'%s' is not a valid ipv4/ipv6", ip)
+			bi, ok := new(big.Int).SetString(v, 10)
+			if !ok {
+				return IPAddress{}, fmt.Errorf("'%s' is not a valid ipv4/ipv6", ip)
+			}
+			if _version == 0 {
+				return IPAddress{}, fmt.Errorf("missing the argument 'version'")
+			}
+			return NewIPAddress(bi.Bytes(), _version)
 		}
+
 		if _version == 0 {
 			if strings.Contains(v, ":") {
 				_version = 6
@@ -60,43 +60,60 @@ func NewIPAddress(ip interface{}, version ...int) (IPAddress, error) {
 		}
 	case []byte:
 		bs := ip.([]byte)
-		switch len(bs) {
+		_len := len(bs)
+		switch _len {
 		case net.IPv4len:
 			_version = 4
-			_ip = net.IPv4(bs[0], bs[1], bs[2], bs[3])
+			// _ip = net.IPv4(bs[0], bs[1], bs[2], bs[3])
+			_ip = net.IP(bs)
 		case net.IPv6len:
 			_version = 6
 			_ip = net.IP(bs)
 		default:
-			return IPAddress{}, fmt.Errorf("the length of []byte must be 4 or 16")
+			switch _version {
+			case 4:
+				if _len > net.IPv4len {
+					return IPAddress{}, fmt.Errorf("the bytes is too long")
+				} else if _len < net.IPv4len {
+					_bs := [net.IPv4len]byte{}
+					copy(_bs[net.IPv4len-_len:], bs)
+					bs = _bs[:]
+				}
+				// _ip = net.IPv4(bs[0], bs[1], bs[2], bs[3])
+				_ip = net.IP(bs)
+			case 6:
+				if _len > net.IPv6len {
+					return IPAddress{}, fmt.Errorf("the bytes is too long")
+				} else if _len < net.IPv6len {
+					_bs := [net.IPv6len]byte{}
+					copy(_bs[net.IPv6len-_len:], bs)
+					bs = _bs[:]
+				}
+				_ip = net.IP(bs)
+
+			default:
+				return IPAddress{}, fmt.Errorf("missing the argument 'version'")
+			}
 		}
 	case [4]byte:
 		_version = 4
 		bs := ip.([4]byte)
-		_ip = net.IPv4(bs[0], bs[1], bs[2], bs[3])
+		// _ip = net.IPv4(bs[0], bs[1], bs[2], bs[3])
+		_ip = net.IP(bs[:])
 	case [16]byte:
 		_version = 6
 		bs := ip.([16]byte)
 		_ip = net.IP(bs[:])
-	case float64:
-		if _version == 0 {
-			return IPAddress{}, fmt.Errorf("missing the argument 'version'")
-		}
-		f := ip.(float64)
-		switch _version {
-		case 4:
-			return NewIPAddressByUint64(uint64(f)), nil
-		case 6:
-			v := float64(uint64Max)
-			v1 := uint64(f / v)
-			v2 := uint64(math.Mod(f, v))
-			return NewIPAddressByUint64(v1, v2), nil
-		}
 	case net.IP:
 		if _version == 0 {
 			return IPAddress{}, fmt.Errorf("missing the argument 'version'")
 		}
 		_ip = ip.(net.IP)
+	case *big.Int:
+		if _version == 0 {
+			return IPAddress{}, fmt.Errorf("missing the argument 'version'")
+		}
+		return NewIPAddress(ip.(*big.Int).Bytes(), _version)
 	default:
 		return IPAddress{}, fmt.Errorf("does not support the type '%T'", ip)
 	}
@@ -156,38 +173,24 @@ func (ip IPAddress) IPv6() IPAddress {
 	return IPAddress{ip: ip.ip.To16(), version: 6}
 }
 
-// IPv4Value returns an 32-bit integer of ip. But it returns uint64 as the type.
-//
-// If the ip address is IPv6, it will return 0.
-func (ip IPAddress) IPv4Value() uint64 {
-	if ip.version == 6 {
-		return 0
+// Value returns the integer string representation of the ipv4/ipv6 address.
+func (ip IPAddress) Value() string {
+	bi := ip.BigInt()
+	if bi == nil {
+		return ""
 	}
-	return ipv4ToUint64(ip.ip[:4])
+	return bi.String()
 }
 
-// IPv6Value returns two 64-bit integers of ipv4.
-//
-// The first value is the first 64 bits, and the last is the last 64 bits.
-//
-// If the ip address is IPv4, it will return (0, 0).
-func (ip IPAddress) IPv6Value() (uint64, uint64) {
-	if ip.version == 4 {
-		return 0, 0
-	}
-	return ipv6ToUint64(ip.ip[:16])
-}
-
-// Value returns the 64-bit float representation of the ipv4/ipv6 address.
-func (ip IPAddress) Value() float64 {
+// BigInt returns the big integer representation of the ipv4/ipv6 address.
+func (ip IPAddress) BigInt() *big.Int {
 	switch ip.version {
 	case 4:
-		return float64(ip.IPv4Value())
+		return new(big.Int).SetBytes(ip.IPv4().Bytes())
 	case 6:
-		v1, v2 := ip.IPv6Value()
-		return float64(v1)*float64(uint64Max) + float64(v2)
+		return new(big.Int).SetBytes(ip.IPv6().Bytes())
 	}
-	return 0
+	return nil
 }
 
 // Equal reports whether ip is equal to other.

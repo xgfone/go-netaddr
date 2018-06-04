@@ -13,8 +13,8 @@ func ExampleIPAddress() {
 	}
 	fmt.Println(ip, ip.IsValid())
 
-	v1, v2 := ip.IPv6Value()
-	fmt.Println(ip.Equal(NewIPAddressByUint64(v1, v2)))
+	s := ip.Value()
+	fmt.Println(ip.Equal(MustNewIPAddress(s, ip.Version())))
 
 	fmt.Println(ip.IsGlobalUnicast())
 	fmt.Println(ip.IsInterfaceLocalMulticast())
@@ -32,8 +32,8 @@ func ExampleIPAddress() {
 	fmt.Println(ip, ip.IsValid())
 	fmt.Println(ip.Bytes())
 
-	v1 = ip.IPv4Value()
-	fmt.Println(ip.Equal(NewIPAddressByUint64(v1)))
+	s = ip.Value()
+	fmt.Println(ip.Equal(MustNewIPAddress(s, ip.Version())))
 
 	fmt.Println(ip.IsGlobalUnicast())
 	fmt.Println(ip.IsInterfaceLocalMulticast())

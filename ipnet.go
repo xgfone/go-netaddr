@@ -3,6 +3,7 @@ package netaddr
 import (
 	"fmt"
 	"math"
+	"math/big"
 	"net"
 	"strconv"
 	"strings"
@@ -61,8 +62,8 @@ func init() {
 		host := uint64ToBytes(host1, host2)
 		net := uint64ToBytes(net1, net2)
 
-		ipv6NetworkMaskMap[i] = host[:]
-		ipv6HostMaskMap[i] = net[:]
+		ipv6NetworkMaskMap[i] = net[:]
+		ipv6HostMaskMap[i] = host[:]
 	}
 }
 
@@ -369,10 +370,10 @@ func (net IPNetwork) HasIP(ip IPAddress) bool {
 		return false
 	}
 
-	first := net.First().Value()
-	last := net.Last().Value()
-	value := ip.Value()
-	if first <= value && value <= last {
+	first := net.First().BigInt()
+	last := net.Last().BigInt()
+	value := ip.BigInt()
+	if first.Cmp(value) <= 0 && value.Cmp(last) <= 0 {
 		return true
 	}
 	return false
@@ -392,9 +393,10 @@ func (net IPNetwork) HasStringIP(ip string) bool {
 // Notice: For the more bigger network, please don't traverse it.
 func (net IPNetwork) Walk(f func(IPAddress)) {
 	version := net.ip.version
-	first := net.First().Value()
-	last := net.Last().Value()
-	for i := first; i <= last; i++ {
+	first := net.First().BigInt()
+	last := net.Last().BigInt()
+	step := big.NewInt(1)
+	for i := first; i.Cmp(last) <= 0; i.Add(i, step) {
 		ip, err := NewIPAddress(i, version)
 		if err != nil {
 			panic(err)
