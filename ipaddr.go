@@ -190,8 +190,8 @@ func (ip IPAddress) Value() float64 {
 	return 0
 }
 
-// IsEqual reports whether ip is equal to other.
-func (ip IPAddress) IsEqual(other IPAddress) bool {
+// Equal reports whether ip is equal to other.
+func (ip IPAddress) Equal(other IPAddress) bool {
 	return ip.ip.Equal(other.ip)
 }
 
