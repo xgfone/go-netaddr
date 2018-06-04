@@ -12,14 +12,14 @@ ip := MustNewIPAddress("fe80::d656:43a8:fc42:948c")
 fmt.Println(ip) // fe80::d656:43a8:fc42:948c
 
 v1 := ip.Value()
-fmt.Println(ip.IsEqual(MustNewIPAddress(v1, ip.Version()))) // true
+fmt.Println(ip.Equal(MustNewIPAddress(v1, ip.Version()))) // true
 
 // IPv4
 ip = MustNewIPAddress("192.168.10.10")
 fmt.Println(ip) // 192.168.10.10
 
 v2 := ip.Value()
-fmt.Println(ip.IsEqual(MustNewIPAddress(v2, ip.Version()))) // true
+fmt.Println(ip.Equal(MustNewIPAddress(v2, ip.Version()))) // true
 ```
 
 #### IP Network
@@ -36,4 +36,7 @@ fmt.Println(net.Last()) // 192.168.10.255
 fmt.Println(net.CIDR()) // 192.168.10.0/24
 fmt.Println(net.HasStringIP("192.168.10.0")) // true
 fmt.Println(net.HasStringIP("192.168.11.0")) // false
+fmt.Println(net.Size()) // 16
+fmt.Println(net.Previous()) // 192.168.9.0/24
+fmt.Println(net.Next()) // 192.168.11.0/24
 ```

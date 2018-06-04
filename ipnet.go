@@ -298,6 +298,8 @@ func MustNewIPNetwork(ipnet string) IPNetwork {
 }
 
 // String returns a string representation of the ip network.
+//
+// It will return "" if the network is invalid.
 func (net IPNetwork) String() string {
 	if net.ip.IsValid() {
 		return fmt.Sprintf("%s/%d", net.ip.String(), net.mask)

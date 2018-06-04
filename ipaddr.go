@@ -144,6 +144,8 @@ func (ip IPAddress) IsValid() bool {
 }
 
 // String returns a string representation of the ip address.
+//
+// It will return "" if the ip address is invalid.
 func (ip IPAddress) String() string {
 	if ip.IsValid() {
 		return ip.ip.String()
