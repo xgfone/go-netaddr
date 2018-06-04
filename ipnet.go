@@ -450,11 +450,6 @@ func (net IPNetwork) Contains(other IPNetwork) bool {
 		return false
 	}
 
-	// netfirst := net.First().BigInt()
-	// netlast := net.Last().BigInt()
-	// otherfirst := other.First().BigInt()
-	// otherlast := other.Last().BigInt()
-
 	if net.First().BigInt().Cmp(other.First().BigInt()) <= 0 &&
 		other.Last().BigInt().Cmp(net.Last().BigInt()) <= 0 {
 		return true
