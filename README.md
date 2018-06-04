@@ -39,4 +39,5 @@ fmt.Println(net.HasStringIP("192.168.11.0")) // false
 fmt.Println(net.Size()) // 16
 fmt.Println(net.Previous()) // 192.168.9.0/24
 fmt.Println(net.Next()) // 192.168.11.0/24
+fmt.Println(net.Contains(MustNewIPNetwork("192.168.10.0/28"))) // true
 ```
