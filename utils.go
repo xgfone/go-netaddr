@@ -60,6 +60,15 @@ func uint64ToBytes(v1, v2 uint64) (bs [16]byte) {
 	return
 }
 
+func bytesIsZero(buf []byte) bool {
+	for _, c := range buf {
+		if c != 0 {
+			return false
+		}
+	}
+	return true
+}
+
 func bytesAnd(left, right []byte) []byte {
 	if left == nil || right == nil || len(left) != len(right) {
 		return nil

@@ -145,7 +145,10 @@ func (ip IPAddress) IsValid() bool {
 
 // String returns a string representation of the ip address.
 func (ip IPAddress) String() string {
-	return ip.ip.String()
+	if ip.IsValid() {
+		return ip.ip.String()
+	}
+	return ""
 }
 
 // Bytes returns a []byte representation of the ip address.

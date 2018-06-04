@@ -88,6 +88,58 @@ func ExampleIPNetwork_CIDR() {
 	// fe80::d656:43a8:fc42:9480/124
 }
 
+func ExampleIPNetwork_Previous() {
+	// IPv4
+	previous, _ := MustNewIPNetwork("192.168.10.10/24").Previous()
+	fmt.Println(previous)
+
+	previous, _ = MustNewIPNetwork("192.168.0.10/24").Previous()
+	fmt.Println(previous)
+
+	_, err := MustNewIPNetwork("0.0.0.0/24").Previous()
+	fmt.Println(err)
+
+	// IPv6
+	previous, _ = MustNewIPNetwork("fe80::d656:43a8:fc42:948c/124").Previous()
+	fmt.Println(previous)
+
+	_, err = MustNewIPNetwork("::f/124").Previous()
+	fmt.Println(err)
+
+	// Output:
+	// 192.168.9.0/24
+	// 192.167.255.0/24
+	// decrement is less than zero
+	// fe80::d656:43a8:fc42:9470/124
+	// decrement is less than zero
+}
+
+func ExampleIPNetwork_Next() {
+	// IPv4
+	next, _ := MustNewIPNetwork("192.168.10.10/24").Next()
+	fmt.Println(next)
+
+	next, _ = MustNewIPNetwork("192.168.255.10/24").Next()
+	fmt.Println(next)
+
+	_, err := MustNewIPNetwork("255.255.255.255/24").Next()
+	fmt.Println(err)
+
+	// IPv6
+	next, _ = MustNewIPNetwork("fe80::d656:43a8:fc42:948c/124").Next()
+	fmt.Println(next)
+
+	_, err = MustNewIPNetwork("ffff:ffff:ffff:ffff:ffff:ffff:ffff:ffff/124").Next()
+	fmt.Println(err)
+
+	// Output:
+	// 192.168.11.0/24
+	// 192.169.0.0/24
+	// increment exceeds address boundary
+	// fe80::d656:43a8:fc42:9490/124
+	// increment exceeds address boundary
+}
+
 func ExampleIPNetwork_Size() {
 	net := MustNewIPNetwork("192.168.10.10/22")
 	fmt.Printf("%.0f\n", net.Size())

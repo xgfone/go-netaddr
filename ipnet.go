@@ -10,6 +10,10 @@ import (
 )
 
 var (
+	zero = big.NewInt(0)
+	one  = big.NewInt(1)
+	two  = big.NewInt(2)
+
 	uint32Max = uint32(math.MaxUint32)
 	uint64Max = uint64(math.MaxUint64)
 
@@ -23,6 +27,8 @@ var (
 	ipv4NetworkMaskMap map[int][]byte
 	ipv6HostMaskMap    map[int][]byte
 	ipv6NetworkMaskMap map[int][]byte
+
+	exps map[int]*big.Int
 )
 
 func init() {
@@ -43,6 +49,7 @@ func init() {
 		ipv4HostMaskMap[i] = _host[:]
 	}
 
+	exps = make(map[int]*big.Int, 129)
 	ipv6HostMaskMap = make(map[int][]byte, 129)
 	ipv6NetworkMaskMap = make(map[int][]byte, 129)
 	for i := 0; i <= ipv6MaxBit; i++ {
@@ -64,6 +71,8 @@ func init() {
 
 		ipv6NetworkMaskMap[i] = net[:]
 		ipv6HostMaskMap[i] = host[:]
+
+		exps[i] = big.NewInt(0).Exp(two, big.NewInt(int64(i)), nil)
 	}
 }
 
@@ -93,6 +102,16 @@ func getMaxMask(version int) []byte {
 		return ipv4MaxMask
 	case 6:
 		return ipv6MaxMask
+	}
+	return nil
+}
+
+func getExpMask(version, mask int) *big.Int {
+	switch version {
+	case 4:
+		return exps[ipv4MaxBit-mask]
+	case 6:
+		return exps[ipv6MaxBit-mask]
 	}
 	return nil
 }
@@ -280,7 +299,10 @@ func MustNewIPNetwork(ipnet string) IPNetwork {
 
 // String returns a string representation of the ip network.
 func (net IPNetwork) String() string {
-	return fmt.Sprintf("%s/%d", net.ip.String(), net.mask)
+	if net.ip.IsValid() {
+		return fmt.Sprintf("%s/%d", net.ip.String(), net.mask)
+	}
+	return ""
 }
 
 // Version returns the version of the network.
@@ -364,6 +386,47 @@ func (net IPNetwork) CIDR() IPNetwork {
 	return cidr
 }
 
+func (net IPNetwork) moveNetwork(previous bool) (IPNetwork, error) {
+	netmask := getNetworkMask(net.ip.version, net.mask)
+	bs := bytesAnd(net.ip.Bytes(), netmask)
+	bi := new(big.Int).SetBytes(bs)
+	iszero := bi.Cmp(zero) == 0
+
+	if previous {
+		bi.Sub(bi, one)
+		bs = bytesAnd(bi.Bytes(), netmask)
+		if iszero && bytesIsZero(bs) {
+			return IPNetwork{}, fmt.Errorf("decrement is less than zero")
+		}
+	} else {
+		bi.Add(bi, getExpMask(net.ip.version, net.mask))
+		bs = bytesAnd(bi.Bytes(), netmask)
+		if !iszero && bytesIsZero(bs) {
+			return IPNetwork{}, fmt.Errorf("increment exceeds address boundary")
+		}
+	}
+
+	ip, err := NewIPAddress(bs, net.ip.version)
+	if err != nil {
+		return IPNetwork{}, err
+	}
+	_net, err := NewIPNetworkFromIPAddress(ip, net.mask)
+	if err != nil {
+		return IPNetwork{}, err
+	}
+	return _net, nil
+}
+
+// Previous returns the previous network of the current.
+func (net IPNetwork) Previous() (IPNetwork, error) {
+	return net.moveNetwork(true)
+}
+
+// Next returns the next network of the current.
+func (net IPNetwork) Next() (IPNetwork, error) {
+	return net.moveNetwork(false)
+}
+
 // HasIP reports whether the network contains this ip address.
 func (net IPNetwork) HasIP(ip IPAddress) bool {
 	if ip.version != net.ip.version {
@@ -395,8 +458,7 @@ func (net IPNetwork) Walk(f func(IPAddress)) {
 	version := net.ip.version
 	first := net.First().BigInt()
 	last := net.Last().BigInt()
-	step := big.NewInt(1)
-	for i := first; i.Cmp(last) <= 0; i.Add(i, step) {
+	for i := first; i.Cmp(last) <= 0; i.Add(i, one) {
 		ip, err := NewIPAddress(i, version)
 		if err != nil {
 			panic(err)
