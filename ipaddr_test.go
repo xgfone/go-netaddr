@@ -97,3 +97,12 @@ func ExampleIPAddress_Value() {
 	// fe80::
 	// true
 }
+
+func ExampleIPAddress_Less() {
+	ip1 := MustNewIPAddress("192.168.10.10")
+	ip2 := MustNewIPAddress("192.168.10.11")
+	fmt.Println(ip1.Less(ip2))
+
+	// Output:
+	// true
+}

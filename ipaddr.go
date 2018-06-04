@@ -217,6 +217,11 @@ func (ip IPAddress) Equal(other IPAddress) bool {
 	return ip.ip.Equal(other.ip)
 }
 
+// Less reports whether ip is less than other.
+func (ip IPAddress) Less(other IPAddress) bool {
+	return ip.BigInt().Cmp(other.BigInt()) < 0
+}
+
 // IsUnspecified reports whether ip is an unspecified address, either
 // the IPv4 address "0.0.0.0" or the IPv6 address "::".
 func (ip IPAddress) IsUnspecified() bool {
