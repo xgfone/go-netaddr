@@ -429,6 +429,25 @@ func (net IPNetwork) Next() (IPNetwork, error) {
 	return net.moveNetwork(false)
 }
 
+// Contains reports whether the network contains the other network,
+// that's, other is the subnet of the current network.
+func (net IPNetwork) Contains(other IPNetwork) bool {
+	if net.ip.version != other.ip.version {
+		return false
+	}
+
+	// netfirst := net.First().BigInt()
+	// netlast := net.Last().BigInt()
+	// otherfirst := other.First().BigInt()
+	// otherlast := other.Last().BigInt()
+
+	if net.First().BigInt().Cmp(other.First().BigInt()) <= 0 &&
+		other.Last().BigInt().Cmp(net.Last().BigInt()) <= 0 {
+		return true
+	}
+	return false
+}
+
 // HasIP reports whether the network contains this ip address.
 func (net IPNetwork) HasIP(ip IPAddress) bool {
 	if ip.version != net.ip.version {

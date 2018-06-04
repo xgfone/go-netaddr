@@ -160,6 +160,21 @@ func ExampleIPNetwork_Size() {
 	// 16
 }
 
+func ExampleIPNetwork_Contains() {
+	net1 := MustNewIPNetwork("192.168.0.0/16")
+	net2 := MustNewIPNetwork("192.168.10.0/24")
+	net3 := MustNewIPNetwork("192.168.11.0/24")
+
+	fmt.Println(net1.Contains(net2))
+	fmt.Println(net2.Contains(net3))
+	fmt.Println(net3.Contains(net1))
+
+	// Output:
+	// true
+	// false
+	// false
+}
+
 func ExampleIPNetwork_HasStringIP() {
 	net := MustNewIPNetwork("192.168.10.10/24")
 	fmt.Println(net.HasStringIP("192.168.10.0"))
