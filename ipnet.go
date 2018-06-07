@@ -134,8 +134,8 @@ func getExpMask(version, mask int) *big.Int {
 var (
 	IPv46To4      = MustNewIPNetwork("192.88.99.0/24") // 6to4 anycast relays (RFC 3068)
 	IPv4Loopback  = MustNewIPNetwork("127.0.0.0/8")    // Loopback addresses (RFC 990)
-	IPv4LinkLocal = MustNewIPNetwork("169.254.0.0/16")
-	IPv4Multicast = MustNewIPNetwork("224.0.0.0/4")
+	IPv4LinkLocal = MustNewIPNetwork("169.254.0.0/16") // Link-Local unicast address (RFC 3927)
+	IPv4Multicast = MustNewIPNetwork("224.0.0.0/4")    // Multicast address (RFC 5771)
 
 	IPv4Private = []IPNetwork{
 		MustNewIPNetwork("10.0.0.0/8"),     // Class A private network local communication (RFC 1918)
@@ -156,13 +156,11 @@ var (
 
 		// Reserved Multicast
 		MustNewIPNetwork("233.252.0.0/24"), // Multicast test network
-
 		MustNewIPNetwork("234.0.0.0/8"),
 		MustNewIPNetwork("235.0.0.0/8"),
 		MustNewIPNetwork("236.0.0.0/8"),
 		MustNewIPNetwork("237.0.0.0/8"),
 		MustNewIPNetwork("238.0.0.0/8"),
-
 		MustNewIPNetwork("225.0.0.0/8"),
 		MustNewIPNetwork("226.0.0.0/8"),
 		MustNewIPNetwork("227.0.0.0/8"),
@@ -178,9 +176,9 @@ var (
 
 // IPv6 Network
 var (
-	IPv6Loopback  = MustNewIPNetwork("::1/128")
-	IPv6LinkLocal = MustNewIPNetwork("fe80::/10")
-	IPv6Multicast = MustNewIPNetwork("ff00::/8")
+	IPv6Loopback  = MustNewIPNetwork("::1/128")   // Loopback address
+	IPv6LinkLocal = MustNewIPNetwork("fe80::/10") // Link-Local unicast address
+	IPv6Multicast = MustNewIPNetwork("ff00::/8")  // Multicast address
 
 	IPv6Private = []IPNetwork{
 		MustNewIPNetwork("fc00::/7"),  // Unique Local Addresses (ULA)
