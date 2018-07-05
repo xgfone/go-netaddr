@@ -357,10 +357,11 @@ func (net IPNetwork) Address() IPAddress {
 }
 
 // Network returns the network address.
-func (net IPNetwork) Network() IPAddress {
+func (net IPNetwork) Network() IPNetwork {
 	bs := bytesAnd(net.ip.Bytes(), getNetworkMask(net.ip.version, net.mask))
 	ip, _ := NewIPAddress(bs)
-	return ip
+	n, _ := NewIPNetworkFromIPAddress(ip, net.mask)
+	return n
 }
 
 // Broadcast returns the broadcast address.
