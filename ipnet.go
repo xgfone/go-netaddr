@@ -282,6 +282,9 @@ func NewIPNetworkFromIP(ip net.IP, version int, mask int) (IPNetwork, error) {
 }
 
 // NewIPNetwork returns a new IPNetwork.
+//
+// Change 0.2.0: the subnet mask is optional.
+// The default is 32 for IPv4, and 128 for IPv6.
 func NewIPNetwork(ipnet string) (IPNetwork, error) {
 	var mask int
 	index := strings.IndexByte(ipnet, '/')
