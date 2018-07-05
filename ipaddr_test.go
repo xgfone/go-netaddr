@@ -120,3 +120,19 @@ func ExampleIPAddress_Network() {
 	// 192.168.10.10/32
 	// fe80::d656:43a8:fc42:948c/128
 }
+
+func ExampleIPAddress_Binary() {
+	ip := MustNewIPAddress("192.168.10.10")
+	fmt.Println(ip.Binary())
+
+	// Output:
+	// 11000000101010000000101000001010
+}
+
+func ExampleIPAddress_Bits() {
+	ip := MustNewIPAddress("192.168.10.10")
+	fmt.Println(ip.Bits())
+
+	// Output:
+	// 11000000.10101000.00001010.00001010
+}

@@ -15,6 +15,7 @@
 package netaddr
 
 import (
+	"bytes"
 	"fmt"
 	"math/big"
 	"net"
@@ -199,6 +200,28 @@ func (ip IPAddress) Value() string {
 		return ""
 	}
 	return bi.String()
+}
+
+func (ip IPAddress) toBinary(sep string) string {
+	buf := bytes.NewBuffer(nil)
+	for _, b := range ip.ip {
+		buf.WriteString(fmt.Sprintf("%08b%s", b, sep))
+	}
+	return buf.String()[:buf.Len()-len(sep)]
+}
+
+// Binary returns the binary format of the IP address.
+//
+// For example, "10101010101010101010101010101010".
+func (ip IPAddress) Binary() string {
+	return ip.toBinary("")
+}
+
+// Bits returns the binary format of the IP address separated by the dot.
+//
+// For example, "10101010.10101010.10101010.10101010".
+func (ip IPAddress) Bits() string {
+	return ip.toBinary(".")
 }
 
 // BigInt returns the big integer representation of the ipv4/ipv6 address.
