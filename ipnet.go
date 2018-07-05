@@ -283,13 +283,20 @@ func NewIPNetworkFromIP(ip net.IP, version int, mask int) (IPNetwork, error) {
 
 // NewIPNetwork returns a new IPNetwork.
 func NewIPNetwork(ipnet string) (IPNetwork, error) {
+	var mask int
 	index := strings.IndexByte(ipnet, '/')
 	if index == -1 {
-		return IPNetwork{}, fmt.Errorf("invalid IPv4/IPv6 network address %s", ipnet)
-	}
-	mask, err := strconv.ParseInt(ipnet[index+1:], 10, 16)
-	if err != nil {
-		return IPNetwork{}, err
+		if strings.IndexByte(ipnet, ':') == -1 {
+			mask = 32
+		} else {
+			mask = 128
+		}
+	} else {
+		_mask, err := strconv.ParseInt(ipnet[index+1:], 10, 16)
+		if err != nil {
+			return IPNetwork{}, err
+		}
+		mask = int(_mask)
 	}
 
 	ip, err := NewIPAddress(ipnet[:index])
@@ -297,7 +304,7 @@ func NewIPNetwork(ipnet string) (IPNetwork, error) {
 		return IPNetwork{}, err
 	}
 
-	return NewIPNetworkFromIPAddress(ip, int(mask))
+	return NewIPNetworkFromIPAddress(ip, mask)
 }
 
 // MustNewIPNetwork is the same as NewIPNetwork, but panic if an error occurs.
