@@ -26,8 +26,8 @@ func ExampleIPNetwork_Network() {
 	fmt.Println(net.Network())
 
 	// Output:
-	// 192.168.10.0/24
-	// fe80::d656:43a8:fc42:9480/124
+	// 192.168.10.0
+	// fe80::d656:43a8:fc42:9480
 }
 
 func ExampleIPNetwork_Broadcast() {
