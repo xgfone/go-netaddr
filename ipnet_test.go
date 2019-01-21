@@ -16,7 +16,20 @@ package netaddr
 
 import (
 	"fmt"
+	"testing"
 )
+
+func TestNewIPNetwork(t *testing.T) {
+	net := MustNewIPNetwork("192.168.10.10/24")
+	if net.String() != "192.168.10.10/24" {
+		t.Error(net.String())
+	}
+
+	net = MustNewIPNetwork("192.168.10.10")
+	if net.String() != "192.168.10.10/32" {
+		t.Error(net.String())
+	}
+}
 
 func ExampleIPNetwork_Network() {
 	net := MustNewIPNetwork("192.168.10.10/24")

@@ -289,6 +289,7 @@ func NewIPNetwork(ipnet string) (IPNetwork, error) {
 	var mask int
 	index := strings.IndexByte(ipnet, '/')
 	if index == -1 {
+		index = len(ipnet)
 		if strings.IndexByte(ipnet, ':') == -1 {
 			mask = 32
 		} else {
