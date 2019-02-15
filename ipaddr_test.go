@@ -88,14 +88,16 @@ func ExampleIPAddress_Value() {
 	ip1, _ := NewIPAddress("fe80::")
 	ip2, _ := NewIPAddress(ip1.Value(), ip1.Version())
 
-	fmt.Println(ip1)
-	fmt.Println(ip2)
+	fmt.Println(ip1.Value())
+	fmt.Println(ip2.Value())
 	fmt.Println(ip1.Equal(ip2))
+	fmt.Println(MustNewIPAddress("192.168.10.10").Value())
 
 	// Output:
-	// fe80::
-	// fe80::
+	// 338288524927261089654018896841347694592
+	// 338288524927261089654018896841347694592
 	// true
+	// 3232238090
 }
 
 func ExampleIPAddress_Less() {
@@ -121,18 +123,55 @@ func ExampleIPAddress_Network() {
 	// fe80::d656:43a8:fc42:948c/128
 }
 
+func ExampleIPAddress_Hex() {
+	fmt.Println(MustNewIPAddress("192.168.10.10").Hex())
+	fmt.Println(MustNewIPAddress("fe80::").Hex())
+
+	// Output:
+	// c0a80a0a
+	// fe800000000000000000000000000000
+}
+
 func ExampleIPAddress_Binary() {
-	ip := MustNewIPAddress("192.168.10.10")
-	fmt.Println(ip.Binary())
+	fmt.Println(MustNewIPAddress("192.168.10.10").Binary())
+	fmt.Println(MustNewIPAddress("fe80::").Binary())
 
 	// Output:
 	// 11000000101010000000101000001010
+	// 11111110100000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000
 }
 
 func ExampleIPAddress_Bits() {
-	ip := MustNewIPAddress("192.168.10.10")
-	fmt.Println(ip.Bits())
+	fmt.Println(MustNewIPAddress("192.168.10.10").Bits())
+	fmt.Println(MustNewIPAddress("fe80::").Bits())
 
 	// Output:
 	// 11000000.10101000.00001010.00001010
+	// 11111110.10000000.00000000.00000000.00000000.00000000.00000000.00000000.00000000.00000000.00000000.00000000.00000000.00000000.00000000.00000000
+}
+
+func ExampleIPAddress_String() {
+	ip := MustNewIPAddress("192.168.10.10")
+	fmt.Println(ip.String())
+
+	// Output:
+	// 192.168.10.10
+}
+
+func ExampleIPAddress_Add() {
+	fmt.Println(MustNewIPAddress("192.168.10.10").Add(10).String())
+	fmt.Println(MustNewIPAddress("fe80::").Add(10).String())
+
+	// Output:
+	// 192.168.10.20
+	// fe80::a
+}
+
+func ExampleIPAddress_Sub() {
+	fmt.Println(MustNewIPAddress("192.168.10.10").Sub(10).String())
+	fmt.Println(MustNewIPAddress("fe80::").Sub(10).String())
+
+	// Output:
+	// 192.168.10.0
+	// fe7f:ffff:ffff:ffff:ffff:ffff:ffff:fff6
 }

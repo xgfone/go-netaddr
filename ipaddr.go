@@ -204,6 +204,12 @@ func (ip IPAddress) Value() string {
 
 func (ip IPAddress) toBinary(sep string) string {
 	buf := bytes.NewBuffer(nil)
+	if ip.version == 6 {
+		buf.Grow(144)
+	} else {
+		buf.Grow(36)
+	}
+	buf.Grow(128)
 	for _, b := range ip.ip {
 		buf.WriteString(fmt.Sprintf("%08b%s", b, sep))
 	}
@@ -222,6 +228,32 @@ func (ip IPAddress) Binary() string {
 // For example, "10101010.10101010.10101010.10101010".
 func (ip IPAddress) Bits() string {
 	return ip.toBinary(".")
+}
+
+// Hex returns the hexadecimal format of the IP address.
+//
+// For example, "c0a80a0a".
+func (ip IPAddress) Hex() string {
+	buf := bytes.NewBuffer(nil)
+	if ip.version == 6 {
+		buf.Grow(32)
+	} else {
+		buf.Grow(8)
+	}
+
+	var ok bool
+	for _, b := range ip.ip {
+		if b == 0 {
+			if !ok {
+				continue
+			}
+		}
+		if !ok {
+			ok = true
+		}
+		buf.WriteString(fmt.Sprintf("%02x", b))
+	}
+	return buf.String()[:buf.Len()]
 }
 
 // BigInt returns the big integer representation of the ipv4/ipv6 address.
@@ -317,4 +349,18 @@ func (ip IPAddress) IsMulticast() bool {
 // that's, 127.0.0.1/8 or ::1.
 func (ip IPAddress) IsLoopback() bool {
 	return ip.ip.IsLoopback()
+}
+
+// Add returns a new IPAddress with its numerical value increased by num.
+func (ip IPAddress) Add(num int64) IPAddress {
+	old := ip.BigInt()
+	old.Add(old, big.NewInt(num))
+	return MustNewIPAddress(old.Bytes(), ip.version)
+}
+
+// Sub returns a new IPAddress with its numerical value decreased by num.
+func (ip IPAddress) Sub(num int64) IPAddress {
+	old := ip.BigInt()
+	old.Sub(old, big.NewInt(num))
+	return MustNewIPAddress(old.Bytes(), ip.version)
 }
