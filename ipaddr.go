@@ -301,6 +301,16 @@ func (ip IPAddress) Less(other IPAddress) bool {
 	return ip.BigInt().Cmp(other.BigInt()) < 0
 }
 
+// IsIPv4 reports whether the ip address is ipv4.
+func (ip IPAddress) IsIPv4() bool {
+	return ip.version == 4
+}
+
+// IsIPv6 reports whether the ip address is ipv6.
+func (ip IPAddress) IsIPv6() bool {
+	return ip.version == 6
+}
+
 // IsUnspecified reports whether ip is an unspecified address, either
 // the IPv4 address "0.0.0.0" or the IPv6 address "::".
 func (ip IPAddress) IsUnspecified() bool {

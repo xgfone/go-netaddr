@@ -175,3 +175,21 @@ func ExampleIPAddress_Sub() {
 	// 192.168.10.0
 	// fe7f:ffff:ffff:ffff:ffff:ffff:ffff:fff6
 }
+
+func ExampleIPAddress_IsIPv4() {
+	fmt.Println(MustNewIPAddress("192.168.10.10").IsIPv4())
+	fmt.Println(MustNewIPAddress("fe80::").IsIPv4())
+
+	// Output:
+	// true
+	// false
+}
+
+func ExampleIPAddress_IsIPv6() {
+	fmt.Println(MustNewIPAddress("192.168.10.10").IsIPv6())
+	fmt.Println(MustNewIPAddress("fe80::").IsIPv6())
+
+	// Output:
+	// false
+	// true
+}
