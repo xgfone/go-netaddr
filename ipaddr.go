@@ -133,13 +133,14 @@ func NewIPAddress(ip interface{}, version ...int) (IPAddress, error) {
 		return IPAddress{}, fmt.Errorf("does not support the type '%T'", ip)
 	}
 
-	addr := IPAddress{ip: _ip, version: _version}
-	if addr.version == 4 {
-		addr = addr.IPv4()
-	} else if addr.version == 6 {
-		addr = addr.IPv6()
+	switch _version {
+	case 4:
+		return IPAddress{ip: _ip.To4(), version: 4}, nil
+	case 6:
+		return IPAddress{ip: _ip.To16(), version: 6}, nil
+	default:
+		return IPAddress{}, fmt.Errorf("the version '%d' is not 4 or 6", _version)
 	}
-	return addr, nil
 }
 
 // MustNewIPAddress is the same as NewIPAddress, but panic if an error occurs.
@@ -185,11 +186,17 @@ func (ip IPAddress) IP() net.IP {
 
 // IPv4 returns a new IPv4 IPAddress.
 func (ip IPAddress) IPv4() IPAddress {
+	if ip.version == 4 {
+		return ip
+	}
 	return IPAddress{ip: ip.ip.To4(), version: 4}
 }
 
 // IPv6 returns a new IPv6 IPAddress.
 func (ip IPAddress) IPv6() IPAddress {
+	if ip.version == 6 {
+		return ip
+	}
 	return IPAddress{ip: ip.ip.To16(), version: 6}
 }
 
