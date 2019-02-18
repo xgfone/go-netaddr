@@ -473,8 +473,7 @@ func (net IPNetwork) Contains(other IPNetwork) bool {
 		return false
 	}
 
-	if net.First().BigInt().Cmp(other.First().BigInt()) <= 0 &&
-		other.Last().BigInt().Cmp(net.Last().BigInt()) <= 0 {
+	if net.first.Compare(other.first) <= 0 && other.first.Compare(net.last) <= 0 {
 		return true
 	}
 	return false
@@ -486,10 +485,7 @@ func (net IPNetwork) HasIP(ip IPAddress) bool {
 		return false
 	}
 
-	first := net.First().BigInt()
-	last := net.Last().BigInt()
-	value := ip.BigInt()
-	if first.Cmp(value) <= 0 && value.Cmp(last) <= 0 {
+	if net.first.Compare(ip) <= 0 && ip.Compare(net.last) <= 0 {
 		return true
 	}
 	return false

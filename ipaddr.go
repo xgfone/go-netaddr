@@ -318,7 +318,7 @@ func (ip IPAddress) Compare(other IPAddress) int {
 
 // Less reports whether ip is less than other.
 func (ip IPAddress) Less(other IPAddress) bool {
-	return ip.BigInt().Cmp(other.BigInt()) < 0
+	return ip.Compare(other) < 0
 }
 
 // IsIPv4 reports whether the ip address is ipv4.
