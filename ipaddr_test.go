@@ -193,3 +193,43 @@ func ExampleIPAddress_IsIPv6() {
 	// false
 	// true
 }
+
+func ExampleIPAddress_Compare() {
+	ip1 := MustNewIPAddress("192.168.10.10")
+	ip2 := MustNewIPAddress("192.168.10.11")
+	switch ip1.Compare(ip2) {
+	case -1:
+		fmt.Println("less")
+	case 0:
+		fmt.Println("equal")
+	case 1:
+		fmt.Println("greater")
+	}
+
+	ip1 = MustNewIPAddress("192.168.10.10")
+	ip2 = MustNewIPAddress("192.168.10.10")
+	switch ip1.Compare(ip2) {
+	case -1:
+		fmt.Println("less")
+	case 0:
+		fmt.Println("equal")
+	case 1:
+		fmt.Println("greater")
+	}
+
+	ip1 = MustNewIPAddress("192.168.10.11")
+	ip2 = MustNewIPAddress("192.168.10.10")
+	switch ip1.Compare(ip2) {
+	case -1:
+		fmt.Println("less")
+	case 0:
+		fmt.Println("equal")
+	case 1:
+		fmt.Println("greater")
+	}
+
+	// Output:
+	// less
+	// equal
+	// greater
+}

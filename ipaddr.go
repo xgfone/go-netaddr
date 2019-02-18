@@ -296,6 +296,26 @@ func (ip IPAddress) Equal(other IPAddress) bool {
 	return ip.ip.Equal(other.ip)
 }
 
+// Compare returns an integer comparing two IPAddresses.
+// The result will be 0 if ip==other, -1 if ip < other, and +1 if ip > other.
+func (ip IPAddress) Compare(other IPAddress) int {
+	len1 := len(ip.ip)
+	len2 := len(other.ip)
+	if len1 != len2 {
+		panic(fmt.Errorf("the version is not consistent"))
+	}
+
+	for i := 0; i < len1; i++ {
+		if ip.ip[i] > other.ip[i] {
+			return 1
+		} else if ip.ip[i] < other.ip[i] {
+			return -1
+		}
+	}
+
+	return 0
+}
+
 // Less reports whether ip is less than other.
 func (ip IPAddress) Less(other IPAddress) bool {
 	return ip.BigInt().Cmp(other.BigInt()) < 0
