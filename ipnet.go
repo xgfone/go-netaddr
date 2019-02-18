@@ -247,10 +247,13 @@ func (ip IPAddress) IsReserved() bool {
 type IPNetwork struct {
 	mask int
 	ip   IPAddress
+
+	last  IPAddress
+	first IPAddress
 }
 
 // NewIPNetworkFromIPAddress returns a new IPNetwork by IPAddress.
-func NewIPNetworkFromIPAddress(ip IPAddress, mask int) (IPNetwork, error) {
+func NewIPNetworkFromIPAddress(ip IPAddress, mask int) (net IPNetwork, err error) {
 	switch ip.version {
 	case 4:
 		if mask < 0 || mask > 32 {
@@ -264,7 +267,10 @@ func NewIPNetworkFromIPAddress(ip IPAddress, mask int) (IPNetwork, error) {
 		return IPNetwork{}, fmt.Errorf("version must be 4 or 6")
 	}
 
-	return IPNetwork{ip: ip, mask: mask}, nil
+	net = IPNetwork{ip: ip, mask: mask}
+	net.first = net.getFirst()
+	net.last = net.getLast()
+	return net, nil
 }
 
 // NewIPNetworkFromIP returns a new IPNetwork by net.IP.
@@ -389,6 +395,10 @@ func (net IPNetwork) HostMask() IPAddress {
 
 // First returns the first ip address of the network.
 func (net IPNetwork) First() IPAddress {
+	return net.first
+}
+
+func (net IPNetwork) getFirst() IPAddress {
 	bs := bytesXor(getMaxMask(net.ip.version), getHostMask(net.ip.version, net.mask))
 	bs = bytesAnd(net.ip.Bytes(), bs)
 	ip, _ := NewIPAddress(bs)
@@ -397,6 +407,10 @@ func (net IPNetwork) First() IPAddress {
 
 // Last returns the last ip address of the network.
 func (net IPNetwork) Last() IPAddress {
+	return net.last
+}
+
+func (net IPNetwork) getLast() IPAddress {
 	bs := bytesOr(net.ip.Bytes(), getHostMask(net.ip.version, net.mask))
 	ip, _ := NewIPAddress(bs)
 	return ip
