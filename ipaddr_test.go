@@ -16,6 +16,7 @@ package netaddr
 
 import (
 	"fmt"
+	"testing"
 )
 
 func ExampleIPAddress() {
@@ -232,4 +233,10 @@ func ExampleIPAddress_Compare() {
 	// less
 	// equal
 	// greater
+}
+
+func TestIPAddress_IsPrivate(t *testing.T) {
+	if !MustNewIPAddress("10.224.224.203").IsPrivate() {
+		t.Fail()
+	}
 }

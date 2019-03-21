@@ -52,9 +52,8 @@ func NewIPAddress(ip interface{}, version ...int) (IPAddress, error) {
 		}
 	}
 
-	switch ip.(type) {
+	switch v := ip.(type) {
 	case string:
-		v := ip.(string)
 		if _ip = net.ParseIP(v); _ip == nil {
 			bi, ok := new(big.Int).SetString(v, 10)
 			if !ok {
@@ -74,37 +73,35 @@ func NewIPAddress(ip interface{}, version ...int) (IPAddress, error) {
 			}
 		}
 	case []byte:
-		bs := ip.([]byte)
-		_len := len(bs)
-		switch _len {
+		switch _len := len(v); _len {
 		case net.IPv4len:
 			_version = 4
-			// _ip = net.IPv4(bs[0], bs[1], bs[2], bs[3])
-			_ip = net.IP(bs)
+			// _ip = net.IPv4(v[0], v[1], v[2], v[3])
+			_ip = net.IP(v)
 		case net.IPv6len:
 			_version = 6
-			_ip = net.IP(bs)
+			_ip = net.IP(v)
 		default:
 			switch _version {
 			case 4:
 				if _len > net.IPv4len {
 					return IPAddress{}, fmt.Errorf("the bytes is too long")
 				} else if _len < net.IPv4len {
-					_bs := [net.IPv4len]byte{}
-					copy(_bs[net.IPv4len-_len:], bs)
-					bs = _bs[:]
+					bs := [net.IPv4len]byte{}
+					copy(bs[net.IPv4len-_len:], v)
+					v = bs[:]
 				}
-				// _ip = net.IPv4(bs[0], bs[1], bs[2], bs[3])
-				_ip = net.IP(bs)
+				// _ip = net.IPv4(v[0], v[1], v[2], v[3])
+				_ip = net.IP(v)
 			case 6:
 				if _len > net.IPv6len {
 					return IPAddress{}, fmt.Errorf("the bytes is too long")
 				} else if _len < net.IPv6len {
-					_bs := [net.IPv6len]byte{}
-					copy(_bs[net.IPv6len-_len:], bs)
-					bs = _bs[:]
+					bs := [net.IPv6len]byte{}
+					copy(bs[net.IPv6len-_len:], v)
+					v = bs[:]
 				}
-				_ip = net.IP(bs)
+				_ip = net.IP(v)
 
 			default:
 				return IPAddress{}, fmt.Errorf("missing the argument 'version'")
@@ -112,23 +109,21 @@ func NewIPAddress(ip interface{}, version ...int) (IPAddress, error) {
 		}
 	case [4]byte:
 		_version = 4
-		bs := ip.([4]byte)
-		// _ip = net.IPv4(bs[0], bs[1], bs[2], bs[3])
-		_ip = net.IP(bs[:])
+		// _ip = net.IPv4(v[0], v[1], v[2], v[3])
+		_ip = net.IP(v[:])
 	case [16]byte:
 		_version = 6
-		bs := ip.([16]byte)
-		_ip = net.IP(bs[:])
+		_ip = net.IP(v[:])
 	case net.IP:
 		if _version == 0 {
 			return IPAddress{}, fmt.Errorf("missing the argument 'version'")
 		}
-		_ip = ip.(net.IP)
+		_ip = v
 	case *big.Int:
 		if _version == 0 {
 			return IPAddress{}, fmt.Errorf("missing the argument 'version'")
 		}
-		return NewIPAddress(ip.(*big.Int).Bytes(), _version)
+		return NewIPAddress(v.Bytes(), _version)
 	default:
 		return IPAddress{}, fmt.Errorf("does not support the type '%T'", ip)
 	}

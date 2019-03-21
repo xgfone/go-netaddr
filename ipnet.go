@@ -34,38 +34,58 @@ var (
 	ipv4MaxBit = 32
 	ipv6MaxBit = 128
 
-	ipv4MaxMask []byte
-	ipv6MaxMask []byte
+	_ipv4MaxMask = uint32ToBytes(uint32Max)
+	_ipv6MaxMask = uint64ToBytes(uint64Max, uint64Max)
+	ipv4MaxMask  = _ipv4MaxMask[:]
+	ipv6MaxMask  = _ipv6MaxMask[:]
 
-	ipv4HostMaskMap    map[int][]byte
-	ipv4NetworkMaskMap map[int][]byte
-	ipv6HostMaskMap    map[int][]byte
-	ipv6NetworkMaskMap map[int][]byte
+	ipv4HostMaskMap    = initIPv4HostMaskMap()
+	ipv4NetworkMaskMap = initIPv4NetworkMaskMap()
+	ipv6HostMaskMap    = initIPv6HostMaskMap()
+	ipv6NetworkMaskMap = initIPv6NetworkMaskMap()
 
-	exps map[int]*big.Int
+	exps = initExps()
 )
 
-func init() {
-	tmp1 := uint32ToBytes(uint32Max)
-	ipv4MaxMask = tmp1[:]
-	tmp2 := uint64ToBytes(uint64Max, uint64Max)
-	ipv6MaxMask = tmp2[:]
-
-	ipv4HostMaskMap = make(map[int][]byte, 33)
-	ipv4NetworkMaskMap = make(map[int][]byte, 33)
+func initIPv4HostMaskMap() map[int][]byte {
+	ipv4HostMaskMap := make(map[int][]byte, 33)
 	for i := 0; i <= ipv4MaxBit; i++ {
-		host := uint32Max >> uint32(i)
-		net := ^host
-
-		_host := uint32ToBytes(host)
-		_net := uint32ToBytes(net)
-		ipv4NetworkMaskMap[i] = _net[:]
+		_host := uint32ToBytes(uint32Max >> uint32(i))
 		ipv4HostMaskMap[i] = _host[:]
 	}
+	return ipv4HostMaskMap
+}
 
-	exps = make(map[int]*big.Int, 129)
-	ipv6HostMaskMap = make(map[int][]byte, 129)
-	ipv6NetworkMaskMap = make(map[int][]byte, 129)
+func initIPv4NetworkMaskMap() map[int][]byte {
+	ipv4NetworkMaskMap := make(map[int][]byte, 33)
+	for i := 0; i <= ipv4MaxBit; i++ {
+		host := uint32Max >> uint32(i)
+		net := uint32ToBytes(^host)
+		ipv4NetworkMaskMap[i] = net[:]
+	}
+	return ipv4NetworkMaskMap
+}
+
+func initIPv6HostMaskMap() map[int][]byte {
+	ipv6HostMaskMap := make(map[int][]byte, 129)
+	for i := 0; i <= ipv6MaxBit; i++ {
+		var host1, host2 uint64
+		if i < 64 {
+			host1 = uint64Max >> uint64(i)
+			host2 = uint64Max
+		} else {
+			host1 = 0
+			host2 = uint64Max >> uint64(i-64)
+		}
+
+		host := uint64ToBytes(host1, host2)
+		ipv6HostMaskMap[i] = host[:]
+	}
+	return ipv6HostMaskMap
+}
+
+func initIPv6NetworkMaskMap() map[int][]byte {
+	ipv6NetworkMaskMap := make(map[int][]byte, 129)
 	for i := 0; i <= ipv6MaxBit; i++ {
 		var net1, net2, host1, host2 uint64
 		if i < 64 {
@@ -80,14 +100,18 @@ func init() {
 			net2 = ^host2
 		}
 
-		host := uint64ToBytes(host1, host2)
 		net := uint64ToBytes(net1, net2)
-
 		ipv6NetworkMaskMap[i] = net[:]
-		ipv6HostMaskMap[i] = host[:]
+	}
+	return ipv6NetworkMaskMap
+}
 
+func initExps() map[int]*big.Int {
+	exps := make(map[int]*big.Int, 129)
+	for i := 0; i <= ipv6MaxBit; i++ {
 		exps[i] = big.NewInt(0).Exp(two, big.NewInt(int64(i)), nil)
 	}
+	return exps
 }
 
 func getHostMask(version, mask int) []byte {
@@ -401,8 +425,7 @@ func (net IPNetwork) First() IPAddress {
 func (net IPNetwork) getFirst() IPAddress {
 	bs := bytesXor(getMaxMask(net.ip.version), getHostMask(net.ip.version, net.mask))
 	bs = bytesAnd(net.ip.Bytes(), bs)
-	ip, _ := NewIPAddress(bs)
-	return ip
+	return MustNewIPAddress(bs)
 }
 
 // Last returns the last ip address of the network.
@@ -412,8 +435,7 @@ func (net IPNetwork) Last() IPAddress {
 
 func (net IPNetwork) getLast() IPAddress {
 	bs := bytesOr(net.ip.Bytes(), getHostMask(net.ip.version, net.mask))
-	ip, _ := NewIPAddress(bs)
-	return ip
+	return MustNewIPAddress(bs)
 }
 
 // CIDR returns the true CIDR address for the network which omits any host bits
