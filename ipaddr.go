@@ -16,6 +16,7 @@ package netaddr
 
 import (
 	"bytes"
+	"encoding/binary"
 	"fmt"
 	"math/big"
 	"net"
@@ -31,10 +32,12 @@ type IPAddress struct {
 // NewIPAddress returns a new IPAddress.
 //
 // The argument, ip, is a IPv4 or IPv6 address, which maybe a string, []byte,
-// [4]byte, [6]byte, net.IP or *big.Int.
+// [4]byte, [16]byte, net.IP, *big.Int, int, int64, uint, uint32 or uint64.
 //
-// For net.IP and *big.Int, the version is necessary, which reprensents
-// the verion of the IP address, that's, 4 or 6.
+// For *big.Int, the version is necessary, which reprensents the verion
+// of the IP address, that's, 4 or 6.
+//
+// For int, int64, uint, uint32 and uint64, the version is 4 by default.
 //
 // For []byte, the version is necessary if the length of bytes is not 4 or 16.
 //
@@ -53,6 +56,41 @@ func NewIPAddress(ip interface{}, version ...int) (IPAddress, error) {
 	}
 
 	switch v := ip.(type) {
+	case int:
+		buf := make([]byte, 4)
+		binary.BigEndian.PutUint32(buf, uint32(v))
+		_ip = net.IP(buf)
+		if _version == 0 {
+			_version = 4
+		}
+	case int64:
+		buf := make([]byte, 4)
+		binary.BigEndian.PutUint32(buf, uint32(v))
+		_ip = net.IP(buf)
+		if _version == 0 {
+			_version = 4
+		}
+	case uint:
+		buf := make([]byte, 4)
+		binary.BigEndian.PutUint32(buf, uint32(v))
+		_ip = net.IP(buf)
+		if _version == 0 {
+			_version = 4
+		}
+	case uint32:
+		buf := make([]byte, 4)
+		binary.BigEndian.PutUint32(buf, uint32(v))
+		_ip = net.IP(buf)
+		if _version == 0 {
+			_version = 4
+		}
+	case uint64:
+		buf := make([]byte, 4)
+		binary.BigEndian.PutUint32(buf, uint32(v))
+		_ip = net.IP(buf)
+		if _version == 0 {
+			_version = 4
+		}
 	case string:
 		if _ip = net.ParseIP(v); _ip == nil {
 			bi, ok := new(big.Int).SetString(v, 10)
@@ -116,7 +154,7 @@ func NewIPAddress(ip interface{}, version ...int) (IPAddress, error) {
 		_ip = net.IP(v[:])
 	case net.IP:
 		if _version == 0 {
-			return IPAddress{}, fmt.Errorf("missing the argument 'version'")
+			_version = len(v)
 		}
 		_ip = v
 	case *big.Int:

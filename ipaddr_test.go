@@ -63,6 +63,10 @@ func ExampleIPAddress() {
 	ip, _ = NewIPAddress("::1")
 	fmt.Println(ip.IsLoopback())
 
+	// Integer
+	ip = MustNewIPAddress(2130706433) // 127.0.0.1 => 127*256^3+1 => 2130706433
+	fmt.Println(ip)
+
 	// Output:
 	// fe80::d656:43a8:fc42:948c true
 	// true
@@ -83,6 +87,7 @@ func ExampleIPAddress() {
 	// false
 	// true
 	// true
+	// 127.0.0.1
 }
 
 func ExampleIPAddress_Value() {
