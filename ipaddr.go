@@ -264,31 +264,10 @@ func (ip IPAddress) Bits() string {
 	return ip.toBinary(".")
 }
 
-// Hex is the the same AllHex, but does not contain the prefix 0.
-//
-// For example, "a0b0c0d".
-func (ip IPAddress) Hex() string {
-	iszero := true
-	_len := len(ip.ip)
-	ss := make([]string, 0, _len)
-	for i := 0; i < _len; i++ {
-		if ip.ip[i] == 0 {
-			if iszero {
-				continue
-			}
-		}
-		if iszero {
-			iszero = false
-		}
-		ss = append(ss, fmt.Sprintf("%02x", ip.ip[i]))
-	}
-	return strings.Join(ss, "")
-}
-
-// AllHex returns the hexadecimal format of the IP address.
+// Hex returns the hexadecimal format of the IP address.
 //
 // For example, "0a0b0c0d".
-func (ip IPAddress) AllHex() string {
+func (ip IPAddress) Hex() string {
 	_len := len(ip.ip)
 	ss := make([]string, 0, _len)
 	for i := 0; i < _len; i++ {

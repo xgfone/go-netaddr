@@ -130,11 +130,11 @@ func ExampleIPAddress_Network() {
 }
 
 func ExampleIPAddress_Hex() {
-	fmt.Println(MustNewIPAddress("192.168.10.10").Hex())
+	fmt.Println(MustNewIPAddress("10.11.12.13").Hex())
 	fmt.Println(MustNewIPAddress("fe80::").Hex())
 
 	// Output:
-	// c0a80a0a
+	// 0a0b0c0d
 	// fe800000000000000000000000000000
 }
 
