@@ -15,7 +15,6 @@
 package netaddr
 
 import (
-	"bytes"
 	"encoding/binary"
 	"fmt"
 	"math/big"
@@ -243,17 +242,12 @@ func (ip IPAddress) Value() string {
 }
 
 func (ip IPAddress) toBinary(sep string) string {
-	buf := bytes.NewBuffer(nil)
-	if ip.version == 6 {
-		buf.Grow(144)
-	} else {
-		buf.Grow(36)
+	_len := len(ip.ip)
+	ss := make([]string, _len)
+	for i := 0; i < _len; i++ {
+		ss[i] = fmt.Sprintf("%08b", ip.ip[i])
 	}
-	buf.Grow(128)
-	for _, b := range ip.ip {
-		buf.WriteString(fmt.Sprintf("%08b%s", b, sep))
-	}
-	return buf.String()[:buf.Len()-len(sep)]
+	return strings.Join(ss, sep)
 }
 
 // Binary returns the binary format of the IP address.
@@ -270,30 +264,37 @@ func (ip IPAddress) Bits() string {
 	return ip.toBinary(".")
 }
 
-// Hex returns the hexadecimal format of the IP address.
+// Hex is the the same AllHex, but does not contain the prefix 0.
 //
-// For example, "c0a80a0a".
+// For example, "a0b0c0d".
 func (ip IPAddress) Hex() string {
-	buf := bytes.NewBuffer(nil)
-	if ip.version == 6 {
-		buf.Grow(32)
-	} else {
-		buf.Grow(8)
-	}
-
-	var ok bool
-	for _, b := range ip.ip {
-		if b == 0 {
-			if !ok {
+	iszero := true
+	_len := len(ip.ip)
+	ss := make([]string, 0, _len)
+	for i := 0; i < _len; i++ {
+		if ip.ip[i] == 0 {
+			if iszero {
 				continue
 			}
 		}
-		if !ok {
-			ok = true
+		if iszero {
+			iszero = false
 		}
-		buf.WriteString(fmt.Sprintf("%02x", b))
+		ss = append(ss, fmt.Sprintf("%02x", ip.ip[i]))
 	}
-	return buf.String()[:buf.Len()]
+	return strings.Join(ss, "")
+}
+
+// AllHex returns the hexadecimal format of the IP address.
+//
+// For example, "0a0b0c0d".
+func (ip IPAddress) AllHex() string {
+	_len := len(ip.ip)
+	ss := make([]string, 0, _len)
+	for i := 0; i < _len; i++ {
+		ss = append(ss, fmt.Sprintf("%02x", ip.ip[i]))
+	}
+	return strings.Join(ss, "")
 }
 
 // BigInt returns the big integer representation of the ipv4/ipv6 address.
