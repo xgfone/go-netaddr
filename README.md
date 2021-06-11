@@ -1,6 +1,6 @@
-# netaddr
+# netaddr [![Build Status](https://api.travis-ci.com/xgfone/netaddr.svg?branch=master)](https://travis-ci.com/github/xgfone/netaddr) [![GoDoc](https://pkg.go.dev/badge/github.com/xgfone/netaddr)](https://pkg.go.dev/github.com/xgfone/netaddr) [![License](https://img.shields.io/badge/License-Apache%202.0-blue.svg?style=flat-square)](https://raw.githubusercontent.com/xgfone/netaddr/master/LICENSE)
 
-This is a Go implemenation of `IPAddress` and `IPNetwork` in the Python package [`netaddr`](https://pypi.org/project/netaddr/). See [godoc](https://godoc.org/github.com/xgfone/netaddr).
+This is a Go implemenation supporting `Go1.7+` of `IPAddress` and `IPNetwork` in the Python package [`netaddr`](https://pypi.org/project/netaddr/). See [godoc](https://pkg.go.dev/github.com/xgfone/netaddr).
 
 ## Usage
 
