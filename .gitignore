@@ -32,3 +32,6 @@ test_*
 
 # VS Code
 .vscode/
+
+# Unix hidden files
+.*
