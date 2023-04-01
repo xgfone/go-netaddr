@@ -30,8 +30,19 @@ _testmain.go
 # test
 test_*
 
+# log
+*.log
+
+vendor/
+
 # VS Code
 .vscode/
+debug
+debug_test
 
-# Unix hidden files
+# Mac
+.DS_Store
+
+# hidden files
 .*
+_*
